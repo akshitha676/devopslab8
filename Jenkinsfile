@@ -8,9 +8,10 @@ pipeline {
 
     stages {
 
-        stage('Clone') {
+        // ✅ Use Jenkins default SCM checkout (fixes branch issue)
+        stage('Checkout') {
             steps {
-                git 'https://github.com/akshitha676/devopslab8.git'
+                checkout scm
             }
         }
 
@@ -42,6 +43,7 @@ pipeline {
         }
 
         /*
+        // 🚫 Kubernetes deployment (disabled for now)
         stage('Deploy to Kubernetes') {
             steps {
                 sh '''
