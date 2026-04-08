@@ -1,12 +1,16 @@
 pipeline {
     agent any
 
+    environment {
+        IMAGE_NAME = "akshithapulaboyina/node-k8s-app"
+        TAG = "latest"
+    }
+
     stages {
 
-        stage('Checkout from GitHub') {
+        stage('Clone') {
             steps {
-                git branch: 'master',
-                    url: 'https://github.com/laxmi916/node-k8s-app.git'
+                git 'https://github.com/akshitha676/devopslab8.git'
             }
         }
 
@@ -18,42 +22,31 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh '''
-                docker build -t my-k8s-app:${BUILD_NUMBER} .
-                docker tag my-k8s-app:${BUILD_NUMBER} laxmi916/my-k8s-app:latest
-                '''
+                sh 'docker build -t $IMAGE_NAME:$TAG .'
             }
         }
 
         stage('Push Docker Image') {
             steps {
-                sh 'docker push laxmi916/my-k8s-app:latest'
+                withCredentials([string(credentialsId: 'dockerhub-password', variable: 'PASS')]) {
+                    sh '''
+                    echo $PASS | docker login -u akshithapulaboyina --password-stdin
+                    docker push $IMAGE_NAME:$TAG
+                    '''
+                }
             }
         }
 
-        stage('Start Minikube if not running') {
-            steps {
-                sh '''
-                if ! minikube status | grep -q "apiserver: Running"; then
-                    echo "Minikube is not running. Starting now..."
-                    minikube start --driver=docker --memory=2048 --cpus=2
-                fi
-                '''
-            }
-        }
-
+        /*
         stage('Deploy to Kubernetes') {
             steps {
                 sh '''
-                # Load latest image into Minikube
-                # minikube image load laxmi916/my-k8s-app:latest
-
-                # Apply manifests
-                minikube kubectl -- apply -f k8s/deployment.yaml
-                minikube kubectl -- apply -f k8s/service.yaml
-                minikube service my-k8s-app-service
+                kubectl apply -f k8s/deployment.yaml
+                kubectl apply -f k8s/service.yaml
                 '''
             }
         }
+        */
+
     }
 }
