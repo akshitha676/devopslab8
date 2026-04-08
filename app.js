@@ -5,7 +5,7 @@ const app = express();
 
 // Root route
 app.get('/', (req, res) => {
-  const sum = add(10, 12);
+  const sum = add(12, 12);
   res.send(`Sum is: ${sum}`);
 });
 
